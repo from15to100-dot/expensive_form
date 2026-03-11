@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>費用記錄</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ios-bg:          #f2f2f7;
+      --ios-card:        #ffffff;
+      --ios-blue:        #007aff;
+      --ios-blue-tap:    #0062cc;
+      --ios-red:         #ff3b30;
+      --ios-green:       #34c759;
+      --ios-label:       #000000;
+      --ios-secondary:   rgba(60,60,67,0.6);
+      --ios-tertiary:    rgba(60,60,67,0.3);
+      --ios-sep:         rgba(60,60,67,0.18);
+      --ios-placeholder: rgba(60,60,67,0.25);
+      --radius-card:     12px;
+      --radius-btn:      14px;
+    }
+
+    html { background: var(--ios-bg); }
+
+    body {
+      font-family: -apple-system, 'Noto Sans TC', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: var(--ios-bg);
+      min-height: 100vh;
+      padding: 20px 16px 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      padding: 12px 4px 4px;
+      margin-bottom: 4px;
+    }
+    .page-header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--ios-label);
+      letter-spacing: -0.6px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--ios-secondary);
+      margin-top: 4px;
+    }
+
+    /* ── Section ── */
+    .section { margin-top: 22px; }
+
+    .section-label {
+      font-size: 13px;
+      color: var(--ios-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0 16px;
+      margin-bottom: 7px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--ios-card);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      min-height: 50px;
+      padding: 0 16px;
+      position: relative;
+    }
+    .row + .row::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 16px; right: 0;
+      height: 0.33px;
+      background: var(--ios-sep);
+    }
+
+    .row-label {
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ios-label);
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+
+    .row input,
+    .row select,
+    .row textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 17px;
+      color: var(--ios-label);
+      text-align: right;
+      -webkit-appearance: none;
+      appearance: none;
+      padding: 13px 0;
+    }
+
+    .row input::placeholder,
+    .row textarea::placeholder {
+      color: var(--ios-placeholder);
+    }
+
+    /* Date field */
+    .row input[type="date"] {
+      color: var(--ios-blue);
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+    }
+    .row input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      position: absolute;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    /* Select chevron */
+    .row-select { cursor: pointer; }
+    .row-select select {
+      color: var(--ios-blue);
+      font-weight: 500;
+      cursor: pointer;
+      padding-right: 16px;
+      text-align: right;
+      text-align-last: right;
+    }
+    .row-select select option {
+      text-align: left;
+    }
+    .row-select::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-right: 1.8px solid var(--ios-tertiary);
+      border-bottom: 1.8px solid var(--ios-tertiary);
+      transform: rotate(-45deg) translateY(-2px);
+      flex-shrink: 0;
+    }
+
+    /* Number */
+    .currency {
+      font-size: 17px;
+      color: var(--ios-secondary);
+      margin-right: 3px;
+      flex-shrink: 0;
+    }
+    .row input[type="number"] { -moz-appearance: textfield; }
+    .row input[type="number"]::-webkit-inner-spin-button,
+    .row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* Textarea */
+    .row-textarea { align-items: flex-start; }
+    .row-textarea .row-label { padding-top: 13px; }
+    .row textarea {
+      text-align: left;
+      resize: none;
+      min-height: 80px;
+      line-height: 1.55;
+      padding: 13px 0;
+    }
+
+    /* ── Submit button ── */
+    .btn-wrap { margin-top: 32px; }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--ios-blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-btn);
+      height: 54px;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-submit:hover  { background: #0071eb; }
+    .btn-submit:active { transform: scale(0.975); background: var(--ios-blue-tap); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-submit .loading { display: none; }
+    .btn-submit.is-loading .label   { display: none; }
+    .btn-submit.is-loading .loading { display: inline; }
+
+    /* ── Toast (iOS-style floating banner) ── */
+    .toast-wrap {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      width: calc(100% - 32px);
+      max-width: 390px;
+      z-index: 9999;
+      transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+      pointer-events: none;
+    }
+    .toast-wrap.show { transform: translateX(-50%) translateY(24px); }
+
+    .toast {
+      background: rgba(28, 28, 30, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 14px;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+    }
+    .toast-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .toast.success .toast-icon { background: var(--ios-green); }
+    .toast.error   .toast-icon { background: var(--ios-red); }
+    .toast-msg {
+      font-size: 14px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* ── Config note ── */
+    .config-note {
+      margin-top: 28px;
+      background: var(--ios-card);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--ios-secondary);
+      line-height: 1.8;
+    }
+    .config-note strong {
+      display: block;
+      color: var(--ios-label);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .config-note strong + strong { margin-top: 10px; }
+    .config-note code {
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 11px;
+      background: var(--ios-bg);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--ios-blue);
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toast-wrap">
+  <div class="toast" id="toast">
+    <div class="toast-icon" id="toast-icon"></div>
+    <div class="toast-msg" id="toast-msg"></div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="page-header">
+  <h1>費用記錄</h1>
+  <p>填寫完成後送出，資料將寫入 Google 試算表</p>
+</div>
+
+<!-- Date -->
+<div class="section">
+  <div class="section-label">日期</div>
+  <div class="card">
+    <div class="row">
+      <span class="row-label">日期</span>
+      <input type="date" id="f-date" required />
+    </div>
+  </div>
+</div>
+
+<!-- Item & Amount -->
+<div class="section">
+  <div class="section-label">消費資訊</div>
+  <div class="card">
+    <div class="row row-select">
+      <span class="row-label">項目</span>
+      <select id="f-item" required>
+        <option value="" disabled selected>請選擇</option>
+        <option value="食">食</option>
+        <option value="衣">衣</option>
+        <option value="住">住</option>
+        <option value="行">行</option>
+        <option value="育">育</option>
+        <option value="樂">樂</option>
+      </select>
+    </div>
+    <div class="row">
+      <span class="row-label">金額</span>
+      <span class="currency">NT$</span>
+      <input type="number" id="f-amount" placeholder="0" min="0" step="1" required />
+    </div>
+  </div>
+</div>
+
+<!-- Payer -->
+<div class="section">
+  <div class="section-label">付款人</div>
+  <div class="card">
+    <div class="row row-select">
+      <span class="row-label">付款人</span>
+      <select id="f-payer" required>
+        <option value="" disabled selected>請選擇</option>
+        <option value="宏">宏</option>
+        <option value="凌">凌</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Note -->
+<div class="section">
+  <div class="section-label">備註說明</div>
+  <div class="card">
+    <div class="row row-textarea">
+      <span class="row-label">說明</span>
+      <textarea id="f-note" placeholder="選填"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Submit -->
+<div class="btn-wrap">
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+    <span class="label">送出</span>
+    <span class="loading">傳送中…</span>
+  </button>
+</div>
+
+<!-- Config -->
+<div class="config-note">
+  <strong>⚙ 使用前設定</strong>
+  將 <code>APPS_SCRIPT_URL</code> 換成你的 Apps Script 部署網址，<code>SHEET_NAME</code> 改為工作表名稱。
+  <strong>📋 Apps Script 部署步驟</strong>
+  1. 試算表 → 擴充功能 → Apps Script，貼入底部 <code>doPost</code> 程式碼<br/>
+  2. 部署 → 新增部署作業 → 類型：網頁應用程式<br/>
+  3. 執行身分：我自己 ／ 存取權：所有人<br/>
+  4. 複製網址填入 <code>APPS_SCRIPT_URL</code>
+</div>
+
+<script>
+  // ── 設定區 ───────────────────────────────────────
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQxUUwko60q1WSUqbpO_R0eQ8MMt4YMX-2PyJs33IQJEQ5HQEMvTdeLJ-nXRR64Ee-ag/exec';
+  const SHEET_NAME = '工作表1';
+  // ─────────────────────────────────────────────────
+
+  document.getElementById('f-date').valueAsDate = new Date();
+
+  function showToast(msg, type) {
+    document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : '✕';
+    document.getElementById('toast-msg').textContent  = msg;
+    document.getElementById('toast').className = 'toast ' + type;
+    const wrap = document.getElementById('toast-wrap');
+    wrap.classList.add('show');
+    setTimeout(() => wrap.classList.remove('show'), 3000);
+  }
+
+  async function submitForm() {
+    const date   = document.getElementById('f-date').value;
+    const item   = document.getElementById('f-item').value;
+    const amount = document.getElementById('f-amount').value;
+    const payer  = document.getElementById('f-payer').value;
+    const note   = document.getElementById('f-note').value;
+
+    if (!date || !item || !amount || !payer) {
+      showToast('請填寫所有必填欄位', 'error'); return;
+    }
+    if (isNaN(amount) || Number(amount) < 0) {
+      showToast('金額請輸入有效數字', 'error'); return;
+    }
+    if (APPS_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+      showToast('請先設定 APPS_SCRIPT_URL', 'error'); return;
+    }
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.classList.add('is-loading');
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sheetName: SHEET_NAME, date, item, amount: Number(amount), payer, note })
+      });
+      showToast('已成功寫入試算表 ✓', 'success');
+      document.getElementById('f-item').value   = '';
+      document.getElementById('f-amount').value = '';
+      document.getElementById('f-payer').value  = '';
+      document.getElementById('f-note').value   = '';
+      document.getElementById('f-date').valueAsDate = new Date();
+    } catch (err) {
+      showToast('傳送失敗，請確認設定', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+    }
+  }
+</script>
+
+<!-- ============================================================
+  Google Apps Script — 貼到試算表的 Apps Script 編輯器
+  ============================================================
+
+function doPost(e) {
+  try {
+    var data  = JSON.parse(e.postData.contents);
+    var ss    = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets()[0];
+
+    var aValues = sheet.getRange(1, 1, 1000, 1).getValues();
+    var targetRow = 1;
+    for (var i = 0; i < aValues.length; i++) {
+      if (aValues[i][0] === '' || aValues[i][0] === null) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    sheet.getRange(targetRow, 1, 1, 5).setValues([[
+      data.date, data.item, data.amount, data.payer, data.note || ''
+    ]]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+================================================================ -->
+</html>
