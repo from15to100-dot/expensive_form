@@ -153,13 +153,6 @@
       flex-shrink: 0;
     }
 
-    /* Number */
-    .currency {
-      font-size: 17px;
-      color: var(--ios-secondary);
-      margin-right: 3px;
-      flex-shrink: 0;
-    }
     .row input[type="number"] { -moz-appearance: textfield; }
     .row input[type="number"]::-webkit-inner-spin-button,
     .row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
@@ -246,33 +239,6 @@
       line-height: 1.4;
     }
 
-    /* ── Config note ── */
-    .config-note {
-      margin-top: 28px;
-      background: var(--ios-card);
-      border-radius: var(--radius-card);
-      padding: 14px 16px;
-      font-size: 12px;
-      color: var(--ios-secondary);
-      line-height: 1.8;
-    }
-    .config-note strong {
-      display: block;
-      color: var(--ios-label);
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .config-note strong + strong { margin-top: 10px; }
-    .config-note code {
-      font-family: 'SF Mono', 'Menlo', monospace;
-      font-size: 11px;
-      background: var(--ios-bg);
-      padding: 1px 5px;
-      border-radius: 4px;
-      color: var(--ios-blue);
-      word-break: break-all;
-    }
   </style>
 </head>
 <body>
@@ -320,7 +286,6 @@
     </div>
     <div class="row">
       <span class="row-label">金額</span>
-      <span class="currency">NT$</span>
       <input type="number" id="f-amount" placeholder="0" min="0" step="1" required />
     </div>
   </div>
@@ -347,7 +312,7 @@
   <div class="card">
     <div class="row row-textarea">
       <span class="row-label">說明</span>
-      <textarea id="f-note" placeholder="選填"></textarea>
+      <textarea id="f-note"></textarea>
     </div>
   </div>
 </div>
@@ -360,21 +325,11 @@
   </button>
 </div>
 
-<!-- Config -->
-<div class="config-note">
-  <strong>⚙ 使用前設定</strong>
-  將 <code>APPS_SCRIPT_URL</code> 換成你的 Apps Script 部署網址，<code>SHEET_NAME</code> 改為工作表名稱。
-  <strong>📋 Apps Script 部署步驟</strong>
-  1. 試算表 → 擴充功能 → Apps Script，貼入底部 <code>doPost</code> 程式碼<br/>
-  2. 部署 → 新增部署作業 → 類型：網頁應用程式<br/>
-  3. 執行身分：我自己 ／ 存取權：所有人<br/>
-  4. 複製網址填入 <code>APPS_SCRIPT_URL</code>
-</div>
+
 
 <script>
   // ── 設定區 ───────────────────────────────────────
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQxUUwko60q1WSUqbpO_R0eQ8MMt4YMX-2PyJs33IQJEQ5HQEMvTdeLJ-nXRR64Ee-ag/exec';
-  const SHEET_NAME = '工作表1';
   // ─────────────────────────────────────────────────
 
   document.getElementById('f-date').valueAsDate = new Date();
@@ -414,7 +369,7 @@
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetName: SHEET_NAME, date, item, amount: Number(amount), payer, note })
+        body: JSON.stringify({ date, item, amount: Number(amount), payer, note })
       });
       showToast('已成功寫入試算表 ✓', 'success');
       document.getElementById('f-item').value   = '';
