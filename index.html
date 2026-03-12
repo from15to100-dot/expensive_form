@@ -115,20 +115,22 @@
     }
 
     /* Date field */
-    .row input[type="date"] {
-      color: var(--ios-blue);
-      font-weight: 500;
-      cursor: pointer;
-      position: relative;
+    .row-date { cursor: pointer; }
+    .date-display {
+      flex: 1;
       text-align: right;
-    }
-    .row input[type="date"]::-webkit-calendar-picker-indicator {
-      opacity: 0;
-      position: absolute;
-      right: 0;
-      width: 100%;
-      height: 100%;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--ios-blue);
+      padding: 13px 0;
       cursor: pointer;
+    }
+    #f-date {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
     }
 
     /* Select chevron */
@@ -262,8 +264,9 @@
 <div class="section">
   <div class="section-label">日期</div>
   <div class="card">
-    <div class="row">
+    <div class="row row-date" onclick="document.getElementById('f-date').showPicker()">
       <span class="row-label">日期</span>
+      <span class="date-display" id="date-display"></span>
       <input type="date" id="f-date" required />
     </div>
   </div>
@@ -335,6 +338,16 @@
 
   document.getElementById('f-date').valueAsDate = new Date();
 
+  function updateDateDisplay() {
+    const val = document.getElementById('f-date').value;
+    if (val) {
+      const [y, m, d] = val.split('-');
+      document.getElementById('date-display').textContent = `${y}/${m}/${d}`;
+    }
+  }
+  document.getElementById('f-date').addEventListener('change', updateDateDisplay);
+  updateDateDisplay();
+
   function showToast(msg, type) {
     document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : '✕';
     document.getElementById('toast-msg').textContent  = msg;
@@ -378,6 +391,7 @@
       document.getElementById('f-payer').value  = '';
       document.getElementById('f-note').value   = '';
       document.getElementById('f-date').valueAsDate = new Date();
+      updateDateDisplay();
     } catch (err) {
       showToast('傳送失敗，請確認設定', 'error');
     } finally {
