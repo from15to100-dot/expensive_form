@@ -1,6 +1,6 @@
 {
-  "name": "費用記錄",
-  "short_name": "費用記錄",
+  "name": "家用記錄",
+  "short_name": "家用記錄",
   "description": "記錄每筆消費，自動同步至 Google 試算表",
   "start_url": "/expensive_form/index.html",
   "scope": "/expensive_form/",
