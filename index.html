@@ -271,6 +271,53 @@
       line-height: 1.4;
     }
 
+    /* Checkbox row */
+    .row-check {
+      gap: 16px;
+      padding: 12px 16px;
+      min-height: unset;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--ios-label);
+      user-select: none;
+    }
+    .check-item input[type="checkbox"] {
+      flex: unset;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1.5px solid var(--ios-tertiary);
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--ios-bg);
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .check-item input[type="checkbox"]:checked {
+      border-color: transparent;
+    }
+    .check-item input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    #cb-blue:checked  { background: #007aff; }
+    #cb-red:checked   { background: #ff3b30; }
+    .check-label-blue { color: #007aff; font-weight: 500; }
+    .check-label-red  { color: #ff3b30; font-weight: 500; }
+
   </style>
 </head>
 <body>
@@ -347,6 +394,16 @@
       <span class="row-label">說明</span>
       <textarea id="f-note"></textarea>
     </div>
+    <div class="row row-check">
+      <label class="check-item">
+        <input type="checkbox" id="cb-blue" onchange="onCheckChange('blue')" />
+        <span class="check-label-blue">藍備註</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" id="cb-red" onchange="onCheckChange('red')" />
+        <span class="check-label-red">紅備註</span>
+      </label>
+    </div>
   </div>
 </div>
 
@@ -378,6 +435,15 @@
   document.getElementById('f-date').addEventListener('change', updateDateDisplay);
   updateDateDisplay();
 
+  // ── Checkbox 互斥邏輯 ──
+  function onCheckChange(selected) {
+    if (selected === 'blue' && document.getElementById('cb-blue').checked) {
+      document.getElementById('cb-red').checked = false;
+    } else if (selected === 'red' && document.getElementById('cb-red').checked) {
+      document.getElementById('cb-blue').checked = false;
+    }
+  }
+
   function showToast(msg, type) {
     document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : '✕';
     document.getElementById('toast-msg').textContent  = msg;
@@ -393,6 +459,9 @@
     const amount = document.getElementById('f-amount').value;
     const payer  = document.getElementById('f-payer').value;
     const note   = document.getElementById('f-note').value;
+    const noteColor = document.getElementById('cb-blue').checked ? 'blue'
+                    : document.getElementById('cb-red').checked  ? 'red'
+                    : '';
 
     if (!date || !item || !amount || !payer) {
       showToast('請填寫所有必填欄位', 'error'); return;
@@ -413,13 +482,15 @@
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, item, amount: Number(amount), payer, note })
+        body: JSON.stringify({ date, item, amount: Number(amount), payer, note, noteColor })
       });
       showToast('已成功寫入試算表 ✓', 'success');
       document.getElementById('f-item').value   = '';
       document.getElementById('f-amount').value = '';
       document.getElementById('f-payer').value  = '';
       document.getElementById('f-note').value   = '';
+      document.getElementById('cb-blue').checked = false;
+      document.getElementById('cb-red').checked  = false;
       document.getElementById('f-date').valueAsDate = new Date();
       updateDateDisplay();
     } catch (err) {
@@ -476,7 +547,7 @@ function doPost(e) {
     var ss    = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
 
-    var aValues = sheet.getRange(1, 1, 1000, 1).getValues();
+    var aValues = sheet.getRange(1, 1, 100, 1).getValues();
     var targetRow = 1;
     for (var i = 0; i < aValues.length; i++) {
       if (aValues[i][0] === '' || aValues[i][0] === null) {
@@ -488,6 +559,13 @@ function doPost(e) {
     sheet.getRange(targetRow, 1, 1, 5).setValues([[
       data.date, data.item, data.amount, data.payer, data.note || ''
     ]]);
+
+    // 說明欄文字上色（E欄 = 第5欄）
+    if (data.noteColor === 'blue') {
+      sheet.getRange(targetRow, 5).setFontColor('#007aff');
+    } else if (data.noteColor === 'red') {
+      sheet.getRange(targetRow, 5).setFontColor('#ff3b30');
+    }
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok' }))
